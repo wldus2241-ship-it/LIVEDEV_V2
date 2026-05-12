@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>LIFEDEV - Terminal HUD</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA 메타 태그 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="LIFE RPG" />
+
+  <!-- Apple Touch Icons -->
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png" />
+
+  <!-- 일반 파비콘 -->
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="icon-16.png" />
+
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#5596ec" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- XP 플로팅 컨테이너 -->
+<div id="xp-float-container"></div>
+
+<!-- 레벨업 오버레이 -->
+<div id="levelup-overlay" class="hidden">
+  <div class="levelup-content">
+    <div class="levelup-label">LEVEL UP</div>
+    <div class="levelup-title" id="levelup-title">Lv.6 달성</div>
+    <div class="levelup-subtitle" id="levelup-subtitle">현실 적응자</div>
+  </div>
+</div>
+
+<!-- 메인 래퍼 -->
+<div class="app-wrapper">
+
+  <!-- ══════════════════════════════════════
+       상단 HUD 헤더 (VALORANT 스타일)
+  ══════════════════════════════════════ -->
+  <header class="hud-header">
+    <div class="hud-header-inner">
+      <!-- 로고 블록 -->
+      <div class="hud-logo-block">
+        <div class="hud-logo">LIFE<span class="accent">DEV</span></div>
+        <div class="hud-logo-sub">terminal.hud</div>
+        <div class="hud-date" id="hud-date">Loading...</div>
+      </div>
+
+      <!-- 중앙 레벨/VP -->
+      <div class="hud-center">
+        <div class="hud-agent-rank">AGENT RANK</div>
+        <div class="level-badge">
+          <div class="tier-icon-box">
+            <img class="tier-icon-img" id="tier-icon" src="assets/tiers/Iron_1_Rank.webp" alt="Iron 1" />
+            <div class="tier-name" id="tier-name">IRON 1</div>
+          </div>
+          <div class="level-num-box">LV.<span id="hud-level">1</span></div>
+          <div class="level-title" id="hud-level-title">신규 생존자</div>
+        </div>
+        <div class="xp-bar-wrap">
+          <div class="xp-bar-track">
+            <div class="xp-bar-fill" id="xp-bar-fill"></div>
+          </div>
+          <div class="xp-bar-notches">
+            <div class="xp-notch"></div><div class="xp-notch"></div>
+            <div class="xp-notch"></div><div class="xp-notch"></div>
+            <div class="xp-notch"></div><div class="xp-notch"></div>
+            <div class="xp-notch"></div><div class="xp-notch"></div>
+            <div class="xp-notch"></div><div class="xp-notch"></div>
+          </div>
+          <div class="xp-text">
+            <span id="hud-xp">0</span> / <span id="hud-xp-next">100</span> XP
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 스탯 -->
+      <div class="hud-right">
+        <div class="stat-block">
+          <div class="stat-label">TODAY XP</div>
+          <div class="stat-value accent" id="stat-today-xp">0</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-label">DONE</div>
+          <div class="stat-value" id="stat-done">0</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════════
+       동기부여 띠
+  ══════════════════════════════════════ -->
+  <div class="motivation-bar">
+    <div class="motivation-icon"></div>
+    <span id="motivation-text">Loading...</span>
+    <div class="motivation-icon"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       탭 네비게이션
+  ══════════════════════════════════════ -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="quests">
+      <span class="tab-icon">></span> TASKS
+    </button>
+    <button class="tab-btn" data-tab="life">
+      <span class="tab-icon">#</span> ROUTINE
+    </button>
+    <button class="tab-btn" data-tab="budget">
+      <span class="tab-icon">$</span> BUDGET
+    </button>
+    <button class="tab-btn" data-tab="history">
+      <span class="tab-icon">📅</span> HISTORY
+    </button>
+    <button class="tab-btn" data-tab="stats">
+      <span class="tab-icon">%</span> STATS
+    </button>
+  </nav>
+
+  <!-- ══════════════════════════════════════
+       콘텐츠 영역
+  ══════════════════════════════════════ -->
+  <main class="content-area">
+
+    <!-- ── 탭 1: Task (TODO) ── -->
+    <section id="tab-quests" class="tab-content active">
+
+      <!-- 경고 배너 -->
+      <div id="overload-warning" class="warning-banner hidden">
+        ⚠ 현재 TODO가 너무 많습니다. 당신은 지금 계획 중독 상태입니다.
+      </div>
+
+      <!-- TODO 추가 폼 -->
+      <div class="card add-task-card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          NEW MISSION
+        </div>
+        <div class="form-grid">
+          <input type="text" id="task-title" class="vr-input" placeholder="MISSION TITLE..." maxlength="50" />
+          <input type="text" id="task-desc" class="vr-input" placeholder="DESCRIPTION (OPTIONAL)" maxlength="100" />
+          <div class="form-row">
+            <select id="task-category" class="vr-select"></select>
+            <select id="task-priority" class="vr-select">
+              <option value="low">낮음 (+10 XP)</option>
+              <option value="normal" selected>보통 (+20 XP)</option>
+              <option value="high">높음 (+40 XP)</option>
+              <option value="epic">최상 (+80 XP)</option>
+            </select>
+          </div>
+          <button id="add-task-btn" class="vr-btn">DEPLOY</button>
+        </div>
+      </div>
+
+      <!-- 활성 Task -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          ACTIVE MISSIONS
+          <span class="badge" id="active-count">0</span>
+        </div>
+        <div id="task-list" class="task-list"></div>
+      </div>
+
+      <!-- 완료된 Task -->
+      <div class="card">
+        <div class="card-title collapsible" id="done-toggle">
+          <div class="card-title-mark"></div>
+          COMPLETED
+          <span class="badge done-badge" id="done-count">0</span>
+          <span class="collapse-arrow" id="done-arrow">▾</span>
+        </div>
+        <div id="done-list" class="task-list collapsed"></div>
+      </div>
+
+    </section>
+
+    <!-- ── 탭 2: ROUTINE (고정비) ── -->
+    <section id="tab-life" class="tab-content hidden">
+
+      <!-- 고정비 현황 요약 -->
+      <div class="routine-summary-card">
+        <div class="routine-summary-label">MONTHLY FIXED COSTS</div>
+        <div class="routine-summary-stats">
+          <div class="routine-stat">
+            <span class="routine-stat-value" id="bills-done-count">0</span>
+            <span class="routine-stat-label">/ <span id="bills-total-count">0</span> completed</span>
+          </div>
+          <div class="routine-reset-info">Auto reset: 20th</div>
+        </div>
+      </div>
+
+      <!-- 고정비 추가 폼 -->
+      <div class="card add-task-card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          ADD FIXED COST
+        </div>
+        <div class="form-grid">
+          <div class="form-row">
+            <input type="text" id="bill-title" class="vr-input" placeholder="Item name (e.g. Netflix)" maxlength="30" />
+            <input type="text" id="bill-amount" class="vr-input" placeholder="Amount (e.g. 17,000)" maxlength="15" />
+          </div>
+          <div class="form-row">
+            <input type="number" id="bill-day" class="vr-input" placeholder="Day (1-31)" min="1" max="31" />
+            <input type="number" id="bill-xp" class="vr-input" placeholder="XP (e.g. 20)" min="1" max="500" />
+          </div>
+          <button id="add-bill-btn" class="vr-btn">ADD</button>
+        </div>
+      </div>
+
+      <!-- 고정비 목록 -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          FIXED COSTS LIST
+        </div>
+        <div id="bill-list" class="bill-list"></div>
+      </div>
+
+    </section>
+
+    <!-- ── 탭 3: 가계부 (BUDGET) ── -->
+    <section id="tab-budget" class="tab-content hidden">
+
+      <!-- HP 시스템 (잔액) + 저축 + 카드 실적 -->
+      <div class="budget-hp-card">
+        <div class="budget-hp-info">
+          <div class="budget-hp-label">BALANCE (HP)</div>
+          <div class="budget-hp-amount" id="budget-hp-amount">₩0</div>
+          <div style="display: flex; gap: 12px; margin-top: 8px; font-size: 12px;">
+            <div>💰 저축: <span id="budget-savings-display">₩0</span></div>
+            <div>💳 카드실적: <span id="budget-card-display">₩0</span></div>
+          </div>
+        </div>
+        <div class="budget-character" id="budget-character">😐</div>
+      </div>
+
+      <!-- 가계부 입력 폼 -->
+      <div class="card add-task-card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          NEW TRANSACTION
+        </div>
+        <div class="budget-form-grid form-grid">
+          <div class="form-row">
+            <button id="toggle-income-btn" class="vr-btn budget-toggle-btn active">💰 수입</button>
+            <button id="toggle-expense-btn" class="vr-btn budget-toggle-btn">💸 지출</button>
+            <button id="toggle-saving-btn" class="vr-btn budget-toggle-btn">🏦 저축</button>
+          </div>
+          <input type="number" id="budget-amount" class="vr-input" placeholder="금액 입력" min="1" />
+
+          <!-- 수입 카테고리 -->
+          <select id="budget-category-income" class="vr-select">
+            <option value="SALARY">월급</option>
+            <option value="DUTCH">더치</option>
+            <option value="ALLOWANCE">용돈</option>
+            <option value="OTHER_INCOME">기타</option>
+          </select>
+
+          <!-- 지출 카테고리 -->
+          <select id="budget-category-expense" class="vr-select" style="display: none;">
+            <option value="FOOD">식비</option>
+            <option value="HOBBY">취미</option>
+            <option value="FIXED">고정</option>
+            <option value="LIVING">생활</option>
+            <option value="OTHER_EXPENSE">기타</option>
+          </select>
+
+          <input type="text" id="budget-desc" class="vr-input" placeholder="메모 (선택)" maxlength="50" />
+
+          <!-- 카드 실적 체크박스 (지출 시만 표시) -->
+          <label id="card-spending-checkbox-container" style="display: none; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+            <input type="checkbox" id="card-spending-checkbox" style="width: 16px; height: 16px;" />
+            <span>💳 카드 실적으로 집계</span>
+          </label>
+
+          <button id="add-transaction-btn" class="vr-btn">추가</button>
+        </div>
+      </div>
+
+      <!-- 가계부 로그 -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          TRANSACTION LOG
+        </div>
+        <div id="budget-log" class="budget-log"></div>
+      </div>
+
+    </section>
+
+    <!-- ── 탭 4: 통계 (STATS) ── -->
+    <section id="tab-stats" class="tab-content hidden">
+
+      <!-- 통계 카드 그리드 -->
+      <div class="stats-grid">
+        <div class="card stat-card">
+          <div class="stat-card-label">TOTAL XP</div>
+          <div class="stat-card-value accent" id="s-total-xp">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-label">LEVEL</div>
+          <div class="stat-card-value" id="s-level">1</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-label">COMPLETED</div>
+          <div class="stat-card-value" id="s-total-done">0</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-card-label">TODAY XP</div>
+          <div class="stat-card-value" id="s-today-xp">0</div>
+        </div>
+      </div>
+
+      <!-- 카테고리 분포 -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          CATEGORY DISTRIBUTION
+        </div>
+        <div id="category-chart" class="category-chart"></div>
+      </div>
+
+      <!-- 데이터 관리 -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          DATA MANAGEMENT
+        </div>
+        <div class="form-row" style="gap:8px;margin-top:8px;">
+          <button class="vr-btn btn-danger" id="reset-btn">전체 초기화</button>
+          <button class="vr-btn btn-secondary" id="reset-bills-btn">생활비 리셋</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── 탭 5: 월별 히스토리 (HISTORY) ── -->
+    <section id="tab-history" class="tab-content hidden">
+
+      <!-- 히스토리 소개 -->
+      <div class="card">
+        <div class="card-title">
+          <div class="card-title-mark"></div>
+          📅 MONTHLY HISTORY
+        </div>
+        <p style="font-size: 13px; opacity: 0.8; line-height: 1.5;">
+          매월 1일마다 자동으로 저장되는 월별 기록입니다.<br>
+          각 월의 수입/지출/저축/카드실적을 확인하고 메모를 남길 수 있어요.
+        </p>
+      </div>
+
+      <!-- 히스토리 목록 -->
+      <div id="history-list"></div>
+
+    </section>
+
+  </main>
+
+  <!-- ══════════════════════════════════════
+       모바일 하단 네비게이션
+  ══════════════════════════════════════ -->
+  <nav class="bottom-nav">
+    <button class="bottom-btn active" data-tab="quests">
+      <span class="bottom-icon">></span>
+      <span class="bottom-label">TASKS</span>
+    </button>
+    <button class="bottom-btn" data-tab="life">
+      <span class="bottom-icon">$</span>
+      <span class="bottom-label">ROUTINE</span>
+    </button>
+    <button class="bottom-btn" data-tab="budget">
+      <span class="bottom-icon">#</span>
+      <span class="bottom-label">BUDGET</span>
+    </button>
+    <button class="bottom-btn" data-tab="stats">
+      <span class="bottom-icon">%</span>
+      <span class="bottom-label">STATS</span>
+    </button>
+  </nav>
+
+</div><!-- /.app-wrapper -->
+
+<!-- ══════════════════════════════════════
+     Task 수정 모달
+══════════════════════════════════════ -->
+<div id="edit-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">EDIT MISSION</div>
+    <input type="hidden" id="edit-task-id" />
+    <input type="text" id="edit-task-title" class="vr-input" placeholder="Task 제목" />
+    <input type="text" id="edit-task-desc" class="vr-input" placeholder="설명 (선택)" />
+    <div class="form-row">
+      <select id="edit-task-category" class="vr-select"></select>
+      <select id="edit-task-priority" class="vr-select">
+        <option value="low">낮음 (+10 XP)</option>
+        <option value="normal">보통 (+20 XP)</option>
+        <option value="high">높음 (+40 XP)</option>
+        <option value="epic">최상 (+80 XP)</option>
+      </select>
+    </div>
+    <div class="form-row" style="gap:8px;margin-top:8px;">
+      <button class="vr-btn" id="save-edit-btn">저장</button>
+      <button class="vr-btn btn-secondary" id="cancel-edit-btn">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     생활비 수정 모달
+══════════════════════════════════════ -->
+<div id="edit-bill-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">EDIT LIFE ITEM</div>
+    <input type="hidden" id="edit-bill-id" />
+    <input type="text" id="edit-bill-title" class="vr-input" placeholder="Item name" />
+    <input type="text" id="edit-bill-amount" class="vr-input" placeholder="Amount (optional)" />
+    <div class="form-row">
+      <input type="number" id="edit-bill-day" class="vr-input" placeholder="Day (1-31)" min="1" max="31" />
+      <input type="number" id="edit-bill-xp" class="vr-input" placeholder="VP" min="1" max="500" />
+    </div>
+    <div class="form-row" style="gap:8px;margin-top:8px;">
+      <button class="vr-btn" id="save-bill-edit-btn">저장</button>
+      <button class="vr-btn btn-secondary" id="cancel-bill-edit-btn">취소</button>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
