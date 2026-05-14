@@ -124,9 +124,6 @@
     <button class="tab-btn" data-tab="history">
       <span class="tab-icon">📅</span> HISTORY
     </button>
-    <button class="tab-btn" data-tab="stats">
-      <span class="tab-icon">%</span> STATS
-    </button>
   </nav>
 
   <!-- ══════════════════════════════════════
@@ -300,40 +297,6 @@
         <div id="budget-log" class="budget-log"></div>
       </div>
 
-    </section>
-
-    <!-- ── 탭 4: 통계 (STATS) ── -->
-    <section id="tab-stats" class="tab-content hidden">
-
-      <!-- 통계 카드 그리드 -->
-      <div class="stats-grid">
-        <div class="card stat-card">
-          <div class="stat-card-label">TOTAL XP</div>
-          <div class="stat-card-value accent" id="s-total-xp">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-card-label">LEVEL</div>
-          <div class="stat-card-value" id="s-level">1</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-card-label">COMPLETED</div>
-          <div class="stat-card-value" id="s-total-done">0</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-card-label">TODAY XP</div>
-          <div class="stat-card-value" id="s-today-xp">0</div>
-        </div>
-      </div>
-
-      <!-- 카테고리 분포 -->
-      <div class="card">
-        <div class="card-title">
-          <div class="card-title-mark"></div>
-          CATEGORY DISTRIBUTION
-        </div>
-        <div id="category-chart" class="category-chart"></div>
-      </div>
-
       <!-- 데이터 관리 -->
       <div class="card">
         <div class="card-title">
@@ -348,7 +311,7 @@
 
     </section>
 
-    <!-- ── 탭 5: 월별 히스토리 (HISTORY) ── -->
+    <!-- ── 탭 4: 월별 히스토리 (HISTORY) ── -->
     <section id="tab-history" class="tab-content hidden">
 
       <!-- 히스토리 소개 -->
@@ -386,9 +349,9 @@
       <span class="bottom-icon">#</span>
       <span class="bottom-label">BUDGET</span>
     </button>
-    <button class="bottom-btn" data-tab="stats">
-      <span class="bottom-icon">%</span>
-      <span class="bottom-label">STATS</span>
+    <button class="bottom-btn" data-tab="history">
+      <span class="bottom-icon">📅</span>
+      <span class="bottom-label">HISTORY</span>
     </button>
   </nav>
 
