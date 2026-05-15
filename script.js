@@ -526,8 +526,8 @@ function renderTaskList(containerId, tasks, isDoneSection) {
         </div>
       </div>
       <div class="task-actions">
-        ${!task.done ? `<button class="task-action-btn edit" data-edit="${task.id}" title="수정">e</button>` : ''}
-        <button class="task-action-btn del" data-del="${task.id}" title="삭제">d</button>
+        ${!task.done ? `<button class="task-action-btn edit" data-edit="${task.id}" title="수정">✎</button>` : ''}
+        <button class="task-action-btn del" data-del="${task.id}" title="삭제">×</button>
       </div>`;
 
     container.appendChild(div);
@@ -587,8 +587,8 @@ function renderBills() {
           </div>
         </div>
         <div class="task-actions">
-          <button class="task-action-btn edit" data-bill-edit="${bill.id}" title="수정">e</button>
-          <button class="task-action-btn del" data-bill-del="${bill.id}" title="삭제">d</button>
+          <button class="task-action-btn edit" data-bill-edit="${bill.id}" title="수정">✎</button>
+          <button class="task-action-btn del" data-bill-del="${bill.id}" title="삭제">×</button>
         </div>`;
       container.appendChild(div);
     });
@@ -1598,8 +1598,8 @@ function renderBudgetLog() {
         ${entry.type === 'income' ? '+' : '-'}₩${entry.amount.toLocaleString()}
       </div>
       <div class="budget-log-actions">
-        <button class="budget-log-btn edit" data-budget-edit="${entry.id}" title="수정">e</button>
-        <button class="budget-log-btn del" data-budget-del="${entry.id}" title="삭제">d</button>
+        <button class="budget-log-btn edit" data-budget-edit="${entry.id}" title="수정">✎</button>
+        <button class="budget-log-btn del" data-budget-del="${entry.id}" title="삭제">×</button>
       </div>`;
 
     container.appendChild(div);
