@@ -424,6 +424,9 @@ nav.tab-nav {
   letter-spacing: 0.5px;
   transition: all 0.2s;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .lotto-pixel-btn:hover {
@@ -432,7 +435,8 @@ nav.tab-nav {
 }
 
 .lotto-pixel-icon {
-  display: none;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .lotto-pixel-text {
@@ -870,31 +874,42 @@ nav.tab-nav {
 .budget-log-item {
   background: var(--bg-light);
   border: 1px solid var(--border);
-  padding: 10px 15px;
-  display: grid;
-  grid-template-columns: auto 1fr auto auto auto;
-  gap: 10px;
+  padding: 8px 12px;
+  display: flex;
   align-items: center;
+  gap: 12px;
   font-size: 13px;
 }
 
 .budget-log-date {
   color: var(--text-dim);
   font-size: 11px;
+  white-space: nowrap;
+  min-width: 85px;
 }
 
 .budget-log-desc {
   color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .budget-log-category {
   color: var(--text-dim);
-  font-size: 12px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0.7;
 }
 
 .budget-log-amount {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
 }
 
 .budget-log-amount.income {
@@ -1182,8 +1197,23 @@ nav.tab-nav {
   }
 
   .budget-log-item {
-    grid-template-columns: 1fr;
-    gap: 5px;
+    padding: 6px 10px;
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .budget-log-date {
+    min-width: 70px;
+    font-size: 10px;
+  }
+
+  .budget-log-category {
+    display: none;
+  }
+
+  .budget-log-amount {
+    font-size: 12px;
+    min-width: 70px;
   }
 
   .lotto-pixel-card {
