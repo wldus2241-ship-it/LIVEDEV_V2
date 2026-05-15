@@ -54,45 +54,45 @@ const MOTIVATION_QUOTES = [
 ──────────────────────────────────────────────────── */
 const LEVELS = [
   // 입문 단계
-  { name: "Hello World",        xp: 0 },      // Lv.1
-  { name: "Syntax Learner",     xp: 100 },    // Lv.2
-  { name: "Variable Master",    xp: 250 },    // Lv.3
+  { name: "[ Hello, World! ]",      xp: 0 },      // Lv.1
+  { name: "[ Syntax Learner ]",     xp: 100 },    // Lv.2
+  { name: "[ Variable Master ]",    xp: 250 },    // Lv.3
 
   // 기초 코딩 단계
-  { name: "Loop Builder",       xp: 450 },    // Lv.4
-  { name: "Function Creator",   xp: 700 },    // Lv.5
-  { name: "Array Handler",      xp: 1000 },   // Lv.6
+  { name: "[ Loop Builder ]",       xp: 450 },    // Lv.4
+  { name: "[ Function Creator ]",   xp: 700 },    // Lv.5
+  { name: "[ Array Handler ]",      xp: 1000 },   // Lv.6
 
   // 알고리즘 이해
-  { name: "Algorithm Solver",   xp: 1400 },   // Lv.7
-  { name: "Data Structurer",    xp: 1900 },   // Lv.8
-  { name: "Debug Specialist",   xp: 2500 },   // Lv.9
+  { name: "[ Algorithm Solver ]",   xp: 1400 },   // Lv.7
+  { name: "[ Data Structurer ]",    xp: 1900 },   // Lv.8
+  { name: "[ Debug Specialist ]",   xp: 2500 },   // Lv.9
 
   // 실전 개발
-  { name: "Git Committer",      xp: 3200 },   // Lv.10
-  { name: "API Integrator",     xp: 4000 },   // Lv.11
-  { name: "Database Admin",     xp: 5000 },   // Lv.12
+  { name: "[ Git Committer ]",      xp: 3200 },   // Lv.10
+  { name: "[ API Integrator ]",     xp: 4000 },   // Lv.11
+  { name: "[ Database Admin ]",     xp: 5000 },   // Lv.12
 
   // 중급 개발자
-  { name: "Full Stack Dev",     xp: 6200 },   // Lv.13
-  { name: "System Designer",    xp: 7600 },   // Lv.14
-  { name: "Code Reviewer",      xp: 9200 },   // Lv.15
+  { name: "[ Full Stack Dev ]",     xp: 6200 },   // Lv.13
+  { name: "[ System Designer ]",    xp: 7600 },   // Lv.14
+  { name: "[ Code Reviewer ]",      xp: 9200 },   // Lv.15
 
   // 고급 엔지니어
-  { name: "Architect",          xp: 11000 },  // Lv.16
-  { name: "Performance Tuner",  xp: 13000 },  // Lv.17
-  { name: "Tech Lead",          xp: 15500 },  // Lv.18
+  { name: "[ Architect ]",          xp: 11000 },  // Lv.16
+  { name: "[ Performance Tuner ]",  xp: 13000 },  // Lv.17
+  { name: "[ Tech Lead ]",          xp: 15500 },  // Lv.18
 
   // 전문가 레벨
-  { name: "Principal Engineer", xp: 18500 },  // Lv.19
-  { name: "System Architect",   xp: 22000 },  // Lv.20
-  { name: "CTO Track",          xp: 26000 },  // Lv.21
+  { name: "[ Principal Engineer ]", xp: 18500 },  // Lv.19
+  { name: "[ System Architect ]",   xp: 22000 },  // Lv.20
+  { name: "[ CTO Track ]",          xp: 26000 },  // Lv.21
 
   // 마스터 레벨
-  { name: "10x Developer",      xp: 31000 },  // Lv.22
-  { name: "Code Wizard",        xp: 37000 },  // Lv.23
-  { name: "Tech Visionary",     xp: 44000 },  // Lv.24
-  { name: "Legendary Coder",    xp: 52000 },  // Lv.25
+  { name: "[ 10x Developer ]",      xp: 31000 },  // Lv.22
+  { name: "[ Code Wizard ]",        xp: 37000 },  // Lv.23
+  { name: "[ Tech Visionary ]",     xp: 44000 },  // Lv.24
+  { name: "[ Legendary Coder ]",    xp: 52000 },  // Lv.25
 ];
 
 /* 티어 시스템 제거됨 (터미널 버전) */
@@ -414,7 +414,7 @@ function getLevelInfo(totalXP) {
     nextLevelXP = LEVELS[idx + 1] ? LEVELS[idx + 1].xp : LEVELS[idx].xp + 5000;
   } else {
     // 무한 레벨 (동적 생성)
-    title = `Master Lv.${level - LEVELS.length}`;
+    title = `[ Master Lv.${level - LEVELS.length} ]`;
     const lastLevelXP = LEVELS[LEVELS.length - 1].xp;
     const levelsAbove = level - LEVELS.length;
     const baseIncrement = 5000;

@@ -116,7 +116,7 @@ body {
 }
 
 .level-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #ffffff;
   opacity: 0.9;
@@ -1186,7 +1186,7 @@ nav.tab-nav {
   }
 
   .level-title {
-    font-size: 20px;
+    font-size: 18px;
   }
 
   nav.tab-nav {
