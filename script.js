@@ -1099,36 +1099,6 @@ function initCategorySelects() {
 ════════════════════════════════════════════════════ */
 function initEventListeners() {
 
-  // ── TODO 추가
-  document.getElementById('add-task-btn').addEventListener('click', addTask);
-  document.getElementById('task-title').addEventListener('keydown', e => {
-    if (e.key === 'Enter') addTask();
-  });
-
-  // ── TODO 목록 이벤트 (이벤트 위임)
-  document.getElementById('task-list').addEventListener('click', handleTaskListClick);
-  document.getElementById('done-list').addEventListener('click', handleTaskListClick);
-
-  function handleTaskListClick(e) {
-    const checkBtn = e.target.closest('[data-id]');
-    const editBtn  = e.target.closest('[data-edit]');
-    const delBtn   = e.target.closest('[data-del]');
-
-    if (checkBtn) toggleTask(checkBtn.dataset.id);
-    if (editBtn)  openEditModal(editBtn.dataset.edit);
-    if (delBtn) {
-      if (confirm('이 Task를 삭제할까요?')) deleteTask(delBtn.dataset.del);
-    }
-  }
-
-  // ── 완료 목록 토글 (접기/펼치기)
-  document.getElementById('done-toggle').addEventListener('click', () => {
-    const list  = document.getElementById('done-list');
-    const arrow = document.getElementById('done-arrow');
-    list.classList.toggle('collapsed');
-    arrow.classList.toggle('open');
-  });
-
   // ── 로또 번호 생성
   document.getElementById('lotto-btn').addEventListener('click', generateLotto);
 
@@ -1164,16 +1134,6 @@ function initEventListeners() {
   // ── 탭 버튼 (하단 모바일)
   document.querySelectorAll('.bottom-btn').forEach(btn => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
-
-  // ── 수정 모달
-  document.getElementById('save-edit-btn').addEventListener('click', saveEdit);
-  document.getElementById('cancel-edit-btn').addEventListener('click', closeEditModal);
-  document.getElementById('edit-modal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeEditModal(); // 오버레이 클릭 시 닫기
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeEditModal();
   });
 
   // ── 레벨업 오버레이 클릭 닫기
