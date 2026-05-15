@@ -53,46 +53,57 @@ const MOTIVATION_QUOTES = [
    index = 레벨 번호, 값 = 해당 레벨 달성에 필요한 누적 XP
 ──────────────────────────────────────────────────── */
 const LEVELS = [
-  // 입문 단계
-  { name: "[ Hello, World! ]",      xp: 0 },      // Lv.1
-  { name: "[ Syntax Learner ]",     xp: 100 },    // Lv.2
-  { name: "[ Variable Master ]",    xp: 250 },    // Lv.3
-
-  // 기초 코딩 단계
-  { name: "[ Loop Builder ]",       xp: 450 },    // Lv.4
-  { name: "[ Function Creator ]",   xp: 700 },    // Lv.5
-  { name: "[ Array Handler ]",      xp: 1000 },   // Lv.6
-
-  // 알고리즘 이해
-  { name: "[ Algorithm Solver ]",   xp: 1400 },   // Lv.7
-  { name: "[ Data Structurer ]",    xp: 1900 },   // Lv.8
-  { name: "[ Debug Specialist ]",   xp: 2500 },   // Lv.9
-
-  // 실전 개발
-  { name: "[ Git Committer ]",      xp: 3200 },   // Lv.10
-  { name: "[ API Integrator ]",     xp: 4000 },   // Lv.11
-  { name: "[ Database Admin ]",     xp: 5000 },   // Lv.12
-
-  // 중급 개발자
-  { name: "[ Full Stack Dev ]",     xp: 6200 },   // Lv.13
-  { name: "[ System Designer ]",    xp: 7600 },   // Lv.14
-  { name: "[ Code Reviewer ]",      xp: 9200 },   // Lv.15
-
-  // 고급 엔지니어
-  { name: "[ Architect ]",          xp: 11000 },  // Lv.16
-  { name: "[ Performance Tuner ]",  xp: 13000 },  // Lv.17
-  { name: "[ Tech Lead ]",          xp: 15500 },  // Lv.18
-
-  // 전문가 레벨
-  { name: "[ Principal Engineer ]", xp: 18500 },  // Lv.19
-  { name: "[ System Architect ]",   xp: 22000 },  // Lv.20
-  { name: "[ CTO Track ]",          xp: 26000 },  // Lv.21
-
-  // 마스터 레벨
-  { name: "[ 10x Developer ]",      xp: 31000 },  // Lv.22
-  { name: "[ Code Wizard ]",        xp: 37000 },  // Lv.23
-  { name: "[ Tech Visionary ]",     xp: 44000 },  // Lv.24
-  { name: "[ Legendary Coder ]",    xp: 52000 },  // Lv.25
+  // 카피바라 레벨업 시스템 🦫
+  { name: "[ 아무 생각 없는 카피바라 ]",        xp: 0 },        // Lv.1
+  { name: "[ 졸린 카피바라 ]",                  xp: 100 },      // Lv.2
+  { name: "[ 느긋한 카피바라 ]",                xp: 250 },      // Lv.3
+  { name: "[ 그냥 그런 카피바라 ]",             xp: 450 },      // Lv.4
+  { name: "[ 심심한 카피바라 ]",                xp: 700 },      // Lv.5
+  { name: "[ 피곤한 카피바라 ]",                xp: 1000 },     // Lv.6
+  { name: "[ 배부른 카피바라 ]",                xp: 1400 },     // Lv.7
+  { name: "[ 신난 카피바라 ]",                  xp: 1900 },     // Lv.8
+  { name: "[ 혼밥 중인 카피바라 ]",             xp: 2500 },     // Lv.9
+  { name: "[ 일찍 일어난 카피바라 ]",           xp: 3200 },     // Lv.10
+  { name: "[ 방 청소한 카피바라 ]",             xp: 4000 },     // Lv.11
+  { name: "[ 온천 들어간 카피바라 ]",           xp: 5000 },     // Lv.12
+  { name: "[ 치킨 기다리는 카피바라 ]",         xp: 6200 },     // Lv.13
+  { name: "[ 택배 기다리는 카피바라 ]",         xp: 7600 },     // Lv.14
+  { name: "[ 그냥 있는 카피바라 ]",             xp: 9200 },     // Lv.15
+  { name: "[ 칭찬받은 카피바라 ]",              xp: 11000 },    // Lv.16
+  { name: "[ 설레는 카피바라 ]",                xp: 13000 },    // Lv.17
+  { name: "[ 신난 카피바라 ]",                  xp: 15500 },    // Lv.18
+  { name: "[ 용돈 받은 카피바라 ]",             xp: 18500 },    // Lv.19
+  { name: "[ 행복한 카피바라 ]",                xp: 22000 },    // Lv.20
+  { name: "[ 뿌듯한 카피바라 ]",                xp: 26000 },    // Lv.21
+  { name: "[ 비 맞은 카피바라 ]",               xp: 31000 },    // Lv.22
+  { name: "[ 외로운 카피바라 ]",                xp: 37000 },    // Lv.23
+  { name: "[ 새벽 감성인 카피바라 ]",           xp: 44000 },    // Lv.24
+  { name: "[ 약속 취소된 카피바라 ]",           xp: 52000 },    // Lv.25
+  { name: "[ 부끄러운 카피바라 ]",              xp: 61000 },    // Lv.26
+  { name: "[ 긴장한 카피바라 ]",                xp: 71000 },    // Lv.27
+  { name: "[ 지각한 카피바라 ]",                xp: 82000 },    // Lv.28
+  { name: "[ 다이어트 중인 카피바라 ]",         xp: 94000 },    // Lv.29
+  { name: "[ 유튜브 보다 밤샌 카피바라 ]",      xp: 107000 },   // Lv.30
+  { name: "[ 벼락치기 중인 카피바라 ]",         xp: 121000 },   // Lv.31
+  { name: "[ 시험 망친 카피바라 ]",             xp: 136000 },   // Lv.32
+  { name: "[ 당황한 카피바라 ]",                xp: 152000 },   // Lv.33
+  { name: "[ 오해받은 카피바라 ]",              xp: 169000 },   // Lv.34
+  { name: "[ 억울한 카피바라 ]",                xp: 187000 },   // Lv.35
+  { name: "[ 황당한 카피바라 ]",                xp: 206000 },   // Lv.36
+  { name: "[ 의심스러운 카피바라 ]",            xp: 226000 },   // Lv.37
+  { name: "[ 출근하기 싫은 카피바라 ]",         xp: 247000 },   // Lv.38
+  { name: "[ 월요일인 카피바라 ]",              xp: 269000 },   // Lv.39
+  { name: "[ 단톡방 나간 카피바라 ]",           xp: 292000 },   // Lv.40
+  { name: "[ 슬픈 카피바라 ]",                  xp: 316000 },   // Lv.41
+  { name: "[ 실연당한 카피바라 ]",              xp: 341000 },   // Lv.42
+  { name: "[ 무서운 카피바라 ]",                xp: 367000 },   // Lv.43
+  { name: "[ 화난 카피바라 ]",                  xp: 394000 },   // Lv.44
+  { name: "[ 카페인 과다복용한 카피바라 ]",     xp: 422000 },   // Lv.45
+  { name: "[ 로또 당첨된 카피바라 ]",           xp: 451000 },   // Lv.46
+  { name: "[ 철학적인 카피바라 ]",              xp: 481000 },   // Lv.47
+  { name: "[ 인생 달관한 카피바라 ]",           xp: 512000 },   // Lv.48
+  { name: "[ 존재 자체로 충분한 카피바라 ]",    xp: 544000 },   // Lv.49
+  { name: "[ 오늘도 수고한 카피바라 ]",         xp: 577000 },   // Lv.50
 ];
 
 /* 티어 시스템 제거됨 (터미널 버전) */
