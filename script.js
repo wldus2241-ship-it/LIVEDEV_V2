@@ -282,6 +282,7 @@ function saveData() {
   localStorage.setItem(LS.STATS, JSON.stringify(state.stats));
   localStorage.setItem(LS.BUDGET, JSON.stringify(state.budget));
   localStorage.setItem(LS.HISTORY, JSON.stringify(state.monthlyHistory));
+  console.log('[SAVE] Bills:', state.bills.length, 'Stats XP:', state.stats.totalXP); // 디버깅
 }
 
 /**
@@ -852,7 +853,7 @@ function addBill() {
     title,
     amount: amount || null,
     day: (!isNaN(dayVal) && dayVal >= 1 && dayVal <= 31) ? dayVal : null,
-    xp: 0,
+    xp: 15,  // 고정비 완료 시 15 XP 보상
     done: false,
   };
 

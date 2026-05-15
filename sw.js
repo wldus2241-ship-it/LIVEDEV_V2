@@ -3,7 +3,7 @@
    오프라인 지원 및 캐싱
 ════════════════════════════════════════════════════ */
 
-const CACHE_NAME = 'liferpg-v3';
+const CACHE_NAME = 'liferpg-v4';
 const urlsToCache = [
   './index.html',
   './style.css',
