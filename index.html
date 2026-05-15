@@ -112,17 +112,14 @@
        탭 네비게이션
   ══════════════════════════════════════ -->
   <nav class="tab-nav">
-    <button class="tab-btn active" data-tab="quests">
-      <span class="tab-icon">></span> TASKS
-    </button>
-    <button class="tab-btn" data-tab="life">
+    <button class="tab-btn active" data-tab="life">
       <span class="tab-icon">#</span> ROUTINE
     </button>
     <button class="tab-btn" data-tab="budget">
       <span class="tab-icon">$</span> BUDGET
     </button>
     <button class="tab-btn" data-tab="history">
-      <span class="tab-icon">📅</span> HISTORY
+      <span class="tab-icon">@</span> HISTORY
     </button>
   </nav>
 
@@ -131,61 +128,8 @@
   ══════════════════════════════════════ -->
   <main class="content-area">
 
-    <!-- ── 탭 1: Task (TODO) ── -->
-    <section id="tab-quests" class="tab-content active">
-
-      <!-- 경고 배너 -->
-      <div id="overload-warning" class="warning-banner hidden">
-        ⚠ 현재 TODO가 너무 많습니다. 당신은 지금 계획 중독 상태입니다.
-      </div>
-
-      <!-- TODO 추가 폼 -->
-      <div class="card add-task-card">
-        <div class="card-title">
-          <div class="card-title-mark"></div>
-          NEW MISSION
-        </div>
-        <div class="form-grid">
-          <input type="text" id="task-title" class="vr-input" placeholder="MISSION TITLE..." maxlength="50" />
-          <input type="text" id="task-desc" class="vr-input" placeholder="DESCRIPTION (OPTIONAL)" maxlength="100" />
-          <div class="form-row">
-            <select id="task-category" class="vr-select"></select>
-            <select id="task-priority" class="vr-select">
-              <option value="low">낮음 (+10 XP)</option>
-              <option value="normal" selected>보통 (+20 XP)</option>
-              <option value="high">높음 (+40 XP)</option>
-              <option value="epic">최상 (+80 XP)</option>
-            </select>
-          </div>
-          <button id="add-task-btn" class="vr-btn">DEPLOY</button>
-        </div>
-      </div>
-
-      <!-- 활성 Task -->
-      <div class="card">
-        <div class="card-title">
-          <div class="card-title-mark"></div>
-          ACTIVE MISSIONS
-          <span class="badge" id="active-count">0</span>
-        </div>
-        <div id="task-list" class="task-list"></div>
-      </div>
-
-      <!-- 완료된 Task -->
-      <div class="card">
-        <div class="card-title collapsible" id="done-toggle">
-          <div class="card-title-mark"></div>
-          COMPLETED
-          <span class="badge done-badge" id="done-count">0</span>
-          <span class="collapse-arrow" id="done-arrow">▾</span>
-        </div>
-        <div id="done-list" class="task-list collapsed"></div>
-      </div>
-
-    </section>
-
-    <!-- ── 탭 2: ROUTINE (고정비) ── -->
-    <section id="tab-life" class="tab-content hidden">
+    <!-- ── 탭 1: ROUTINE (고정비) ── -->
+    <section id="tab-life" class="tab-content active">
 
       <!-- 고정비 현황 요약 -->
       <div class="routine-summary-card">
@@ -197,6 +141,15 @@
           </div>
           <div class="routine-reset-info">Auto reset: 20th</div>
         </div>
+      </div>
+
+      <!-- 로또 번호 생성기 (8-bit 픽셀 스타일) -->
+      <div class="lotto-pixel-card">
+        <button class="lotto-pixel-btn" id="lotto-btn">
+          <span class="lotto-pixel-icon">🍀</span>
+          <span class="lotto-pixel-text">RANDOM</span>
+        </button>
+        <div class="lotto-numbers-pixel" id="lotto-numbers"></div>
       </div>
 
       <!-- 고정비 추가 폼 -->
@@ -212,7 +165,6 @@
           </div>
           <div class="form-row">
             <input type="number" id="bill-day" class="vr-input" placeholder="Day (1-31)" min="1" max="31" />
-            <input type="number" id="bill-xp" class="vr-input" placeholder="XP (e.g. 20)" min="1" max="500" />
           </div>
           <button id="add-bill-btn" class="vr-btn">ADD</button>
         </div>
@@ -320,9 +272,8 @@
           <div class="card-title-mark"></div>
           📅 MONTHLY HISTORY
         </div>
-        <p style="font-size: 13px; opacity: 0.8; line-height: 1.5;">
-          매월 1일마다 자동으로 저장되는 월별 기록입니다.<br>
-          각 월의 수입/지출/저축/카드실적을 확인하고 메모를 남길 수 있어요.
+        <p style="font-size: 13px; opacity: 0.8;">
+          Auto-archived monthly logs: income, expenses, savings, card spending w/ memo.
         </p>
       </div>
 
@@ -391,13 +342,26 @@
     <input type="hidden" id="edit-bill-id" />
     <input type="text" id="edit-bill-title" class="vr-input" placeholder="Item name" />
     <input type="text" id="edit-bill-amount" class="vr-input" placeholder="Amount (optional)" />
-    <div class="form-row">
-      <input type="number" id="edit-bill-day" class="vr-input" placeholder="Day (1-31)" min="1" max="31" />
-      <input type="number" id="edit-bill-xp" class="vr-input" placeholder="VP" min="1" max="500" />
-    </div>
+    <input type="number" id="edit-bill-day" class="vr-input" placeholder="Day (1-31)" min="1" max="31" />
     <div class="form-row" style="gap:8px;margin-top:8px;">
       <button class="vr-btn" id="save-bill-edit-btn">저장</button>
       <button class="vr-btn btn-secondary" id="cancel-bill-edit-btn">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     가계부 수정 모달
+══════════════════════════════════════ -->
+<div id="edit-budget-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">EDIT TRANSACTION</div>
+    <input type="hidden" id="edit-budget-id" />
+    <input type="number" id="edit-budget-amount" class="vr-input" placeholder="금액" min="1" />
+    <input type="text" id="edit-budget-desc" class="vr-input" placeholder="메모 (선택)" maxlength="50" />
+    <div class="form-row" style="gap:8px;margin-top:8px;">
+      <button class="vr-btn" id="save-budget-edit-btn">저장</button>
+      <button class="vr-btn btn-secondary" id="cancel-budget-edit-btn">취소</button>
     </div>
   </div>
 </div>

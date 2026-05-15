@@ -172,6 +172,7 @@ let state = {
     totalDone: 0,
     streak: 0,
     lastDoneDate: null,
+    lastLoginDate: null, // 마지막 로그인 날짜 (일일 XP 체크용)
     categoryDone: {}, // { WORK: 3, STUDY: 1, ... }
   },
   budget: {
@@ -251,6 +252,9 @@ function loadData() {
   // 오늘 XP 초기화 (날짜가 바뀌면 리셋)
   checkDailyReset();
 
+  // 일일 로그인 체크 및 보상 (다음 레벨 요구 XP의 10%)
+  checkDailyLogin();
+
   // 생활비 월간 리셋 확인
   checkMonthlyBillReset();
 
@@ -312,6 +316,35 @@ function checkMonthlyBillReset() {
   }
 }
 
+/**
+ * 일일 로그인 체크: 새로운 날이면 다음 레벨까지 필요한 XP의 10% 지급
+ */
+function checkDailyLogin() {
+  const today = getTodayStr();
+  const lastLogin = state.stats.lastLoginDate;
+
+  if (lastLogin !== today) {
+    // 다음 레벨까지 필요한 XP의 10% 계산
+    const levelInfo = getLevelInfo(state.stats.totalXP);
+    const dailyXP = Math.floor(levelInfo.xpNeeded * 0.1);
+
+    // XP 지급
+    const xpBefore = state.stats.totalXP;
+    state.stats.totalXP += dailyXP;
+    state.stats.todayXP += dailyXP;
+
+    // 마지막 로그인 날짜 업데이트
+    state.stats.lastLoginDate = today;
+    saveData();
+
+    // 플로팅 XP 표시 및 레벨업 체크
+    showXPFloat(dailyXP);
+    checkLevelUp(xpBefore, state.stats.totalXP);
+
+    console.log(`일일 로그인 보상: +${dailyXP} XP (다음 레벨 요구 XP의 10%)`);
+  }
+}
+
 /* ════════════════════════════════════════════════════
    날짜 유틸리티
 ════════════════════════════════════════════════════ */
@@ -341,36 +374,66 @@ function formatDate(dateStr) {
 /**
  * 누적 XP로 현재 레벨 번호를 반환합니다 (1부터 시작)
  */
+/**
+ * 무한 레벨 시스템: 현재 XP로 레벨 계산
+ * LEVELS 배열 이후에도 계속 레벨업 가능
+ */
 function calcLevel(totalXP) {
   let level = 1;
+
+  // 정의된 레벨 범위 내
   for (let i = 1; i < LEVELS.length; i++) {
     if (totalXP >= LEVELS[i].xp) level = i + 1;
     else break;
   }
+
+  // 정의된 레벨을 넘어선 경우 동적 계산
+  if (level >= LEVELS.length) {
+    const lastLevelXP = LEVELS[LEVELS.length - 1].xp;
+    const baseIncrement = 5000; // 레벨당 XP 증가량
+    const excessXP = totalXP - lastLevelXP;
+    const additionalLevels = Math.floor(excessXP / baseIncrement);
+    level = LEVELS.length + additionalLevels;
+  }
+
   return level;
 }
 
 /**
- * 현재 레벨 정보를 반환합니다
+ * 현재 레벨 정보를 반환합니다 (무한 레벨 지원)
  */
 function getLevelInfo(totalXP) {
   const level = calcLevel(totalXP);
-  const idx = level - 1; // 배열 인덱스
-  const currentLevelXP = LEVELS[idx].xp;
-  const nextLevelXP = LEVELS[idx + 1] ? LEVELS[idx + 1].xp : null;
+  let title, currentLevelXP, nextLevelXP;
+
+  if (level <= LEVELS.length) {
+    // 정의된 레벨 범위 내
+    const idx = level - 1;
+    title = LEVELS[idx].name;
+    currentLevelXP = LEVELS[idx].xp;
+    nextLevelXP = LEVELS[idx + 1] ? LEVELS[idx + 1].xp : LEVELS[idx].xp + 5000;
+  } else {
+    // 무한 레벨 (동적 생성)
+    title = `Master Lv.${level - LEVELS.length}`;
+    const lastLevelXP = LEVELS[LEVELS.length - 1].xp;
+    const levelsAbove = level - LEVELS.length;
+    const baseIncrement = 5000;
+    currentLevelXP = lastLevelXP + (levelsAbove * baseIncrement);
+    nextLevelXP = currentLevelXP + baseIncrement;
+  }
 
   const xpInLevel = totalXP - currentLevelXP;
-  const xpNeeded = nextLevelXP ? nextLevelXP - currentLevelXP : null;
-  const progress = xpNeeded ? (xpInLevel / xpNeeded) * 100 : 100;
+  const xpNeeded = nextLevelXP - currentLevelXP;
+  const progress = (xpInLevel / xpNeeded) * 100;
 
   return {
     level,
-    title: LEVELS[idx].name,
+    title,
     xpInLevel,
     xpNeeded,
     nextLevelXP,
     progress: Math.min(100, progress),
-    isMax: !nextLevelXP,
+    isMax: false, // 무한 레벨이므로 항상 false
   };
 }
 
@@ -463,8 +526,8 @@ function renderTaskList(containerId, tasks, isDoneSection) {
         </div>
       </div>
       <div class="task-actions">
-        ${!task.done ? `<button class="task-action-btn edit" data-edit="${task.id}" title="수정">✎</button>` : ''}
-        <button class="task-action-btn del" data-del="${task.id}" title="삭제">x</button>
+        ${!task.done ? `<button class="task-action-btn edit" data-edit="${task.id}" title="수정">e</button>` : ''}
+        <button class="task-action-btn del" data-del="${task.id}" title="삭제">d</button>
       </div>`;
 
     container.appendChild(div);
@@ -500,17 +563,6 @@ function renderBills() {
       const div = document.createElement('div');
       div.className = 'bill-item' + (bill.done ? ' done' : '');
 
-      // D-day 계산
-      let ddayHtml = '';
-      if (bill.day != null) {
-        const diff = bill.day - today;
-        let ddayLabel, ddayClass;
-        if (diff === 0)      { ddayLabel = 'D-DAY';       ddayClass = 'dday-today'; }
-        else if (diff > 0)   { ddayLabel = `D-${diff}`;   ddayClass = diff <= 3 ? 'dday-soon' : 'dday-normal'; }
-        else                  { ddayLabel = `D+${Math.abs(diff)}`; ddayClass = 'dday-past'; }
-        ddayHtml = `<span class="bill-dday ${ddayClass}">${ddayLabel}</span>`;
-      }
-
       // 금액 표시
       const amountHtml = bill.amount
         ? `<span class="bill-amount">₩${bill.amount}</span>`
@@ -528,7 +580,6 @@ function renderBills() {
         <div class="bill-body">
           <div class="bill-name-row">
             <span class="bill-name">${escapeHtml(bill.title)}</span>
-            ${ddayHtml}
           </div>
           <div class="bill-meta-row">
             ${dayHtml}
@@ -536,10 +587,9 @@ function renderBills() {
           </div>
         </div>
         <div class="task-actions">
-          <button class="task-action-btn edit" data-bill-edit="${bill.id}" title="수정">✎</button>
-          <button class="task-action-btn del" data-bill-del="${bill.id}" title="삭제">x</button>
-        </div>
-        <div class="bill-xp">+${bill.xp} XP</div>`;
+          <button class="task-action-btn edit" data-bill-edit="${bill.id}" title="수정">e</button>
+          <button class="task-action-btn del" data-bill-del="${bill.id}" title="삭제">d</button>
+        </div>`;
       container.appendChild(div);
     });
   }
@@ -783,17 +833,15 @@ function addBill() {
   const title  = document.getElementById('bill-title').value.trim();
   const amount = document.getElementById('bill-amount').value.trim();
   const dayVal = parseInt(document.getElementById('bill-day').value, 10);
-  const xpVal  = parseInt(document.getElementById('bill-xp').value, 10);
 
-  if (!title)               { flashInput('bill-title'); return; }
-  if (!xpVal || xpVal < 1) { flashInput('bill-xp');    return; }
+  if (!title) { flashInput('bill-title'); return; }
 
   const bill = {
     id: genId(),
     title,
     amount: amount || null,
     day: (!isNaN(dayVal) && dayVal >= 1 && dayVal <= 31) ? dayVal : null,
-    xp: xpVal,
+    xp: 0,
     done: false,
   };
 
@@ -803,7 +851,6 @@ function addBill() {
   document.getElementById('bill-title').value  = '';
   document.getElementById('bill-amount').value = '';
   document.getElementById('bill-day').value    = '';
-  document.getElementById('bill-xp').value     = '';
 
   renderBills();
 }
@@ -824,7 +871,7 @@ function toggleBill(billId) {
     if (bill.amount) {
       const amountNum = parseInt(bill.amount.replace(/,/g, '')) || 0;
       if (amountNum > 0) {
-        addBudgetLog('expense', amountNum, 'FIXED', bill.title + ' (고정비)', true);
+        addBudgetLog('expense', amountNum, 'FIXED', bill.title, true);
       }
     }
 
@@ -860,6 +907,43 @@ function deleteBill(billId) {
   state.bills = state.bills.filter(b => b.id !== billId);
   saveData();
   renderBills();
+}
+
+/**
+ * 로또 번호 생성 (8-bit 픽셀 스타일)
+ */
+function generateLotto() {
+  const container = document.getElementById('lotto-numbers');
+  container.innerHTML = '';
+
+  const numbers = [];
+  while (numbers.length < 6) {
+    const num = Math.floor(Math.random() * 45) + 1;
+    if (!numbers.includes(num)) {
+      numbers.push(num);
+    }
+  }
+
+  numbers.sort((a, b) => a - b);
+
+  numbers.forEach((num, index) => {
+    setTimeout(() => {
+      const ball = document.createElement('div');
+      ball.className = 'lotto-ball-pixel';
+      ball.textContent = num;
+
+      // 번호 범위에 따라 색상 구분 (레트로 팔레트)
+      let range;
+      if (num <= 9) range = '1';
+      else if (num <= 18) range = '2';
+      else if (num <= 27) range = '3';
+      else if (num <= 36) range = '4';
+      else range = '5';
+
+      ball.setAttribute('data-range', range);
+      container.appendChild(ball);
+    }, index * 100);
+  });
 }
 
 /* ════════════════════════════════════════════════════
@@ -1045,6 +1129,9 @@ function initEventListeners() {
     arrow.classList.toggle('open');
   });
 
+  // ── 로또 번호 생성
+  document.getElementById('lotto-btn').addEventListener('click', generateLotto);
+
   // ── 생활비 추가
   document.getElementById('add-bill-btn').addEventListener('click', addBill);
   document.getElementById('bill-title').addEventListener('keydown', e => {
@@ -1054,9 +1141,6 @@ function initEventListeners() {
     if (e.key === 'Enter') document.getElementById('bill-day').focus();
   });
   document.getElementById('bill-day').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('bill-xp').focus();
-  });
-  document.getElementById('bill-xp').addEventListener('keydown', e => {
     if (e.key === 'Enter') addBill();
   });
 
@@ -1189,11 +1273,16 @@ function initEventListeners() {
     });
   }
 
-  // ── 가계부 로그 삭제
+  // ── 가계부 로그 수정/삭제
   const budgetLog = document.getElementById('budget-log');
   if (budgetLog) {
     budgetLog.addEventListener('click', e => {
+      const editBtn = e.target.closest('[data-budget-edit]');
       const delBtn = e.target.closest('[data-budget-del]');
+
+      if (editBtn) {
+        openBudgetEditModal(editBtn.dataset.budgetEdit);
+      }
       if (delBtn) {
         if (confirm('이 항목을 삭제할까요?')) {
           deleteBudgetEntry(delBtn.dataset.budgetDel);
@@ -1218,6 +1307,25 @@ function initEventListeners() {
   if (editBillModal) {
     editBillModal.addEventListener('click', e => {
       if (e.target === e.currentTarget) closeBillEditModal();
+    });
+  }
+
+  // ── 가계부 수정 모달
+  const saveBudgetEditBtn = document.getElementById('save-budget-edit-btn');
+  const cancelBudgetEditBtn = document.getElementById('cancel-budget-edit-btn');
+
+  if (saveBudgetEditBtn) {
+    saveBudgetEditBtn.addEventListener('click', saveBudgetEdit);
+  }
+
+  if (cancelBudgetEditBtn) {
+    cancelBudgetEditBtn.addEventListener('click', closeBudgetEditModal);
+  }
+
+  const editBudgetModal = document.getElementById('edit-budget-modal');
+  if (editBudgetModal) {
+    editBudgetModal.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeBudgetEditModal();
     });
   }
 }
@@ -1529,7 +1637,10 @@ function renderBudgetLog() {
       <div class="budget-log-amount ${entry.type}">
         ${entry.type === 'income' ? '+' : '-'}₩${entry.amount.toLocaleString()}
       </div>
-      <button class="budget-log-del" data-budget-del="${entry.id}" title="삭제">x</button>`;
+      <div class="budget-log-actions">
+        <button class="budget-log-btn edit" data-budget-edit="${entry.id}" title="수정">e</button>
+        <button class="budget-log-btn del" data-budget-del="${entry.id}" title="삭제">d</button>
+      </div>`;
 
     container.appendChild(div);
   });
@@ -1559,6 +1670,69 @@ function deleteBudgetEntry(entryId) {
   state.budget.log = state.budget.log.filter(e => e.id !== entryId);
   saveData();
   renderBudget();
+}
+
+/**
+ * 가계부 항목 수정 모달 열기
+ */
+function openBudgetEditModal(entryId) {
+  const entry = state.budget.log.find(e => e.id === entryId);
+  if (!entry) return;
+
+  document.getElementById('edit-budget-id').value = entry.id;
+  document.getElementById('edit-budget-amount').value = entry.amount;
+  document.getElementById('edit-budget-desc').value = entry.desc || '';
+
+  document.getElementById('edit-budget-modal').classList.remove('hidden');
+}
+
+/**
+ * 가계부 항목 수정 저장
+ */
+function saveBudgetEdit() {
+  const id = document.getElementById('edit-budget-id').value;
+  const amount = parseInt(document.getElementById('edit-budget-amount').value, 10);
+  const desc = document.getElementById('edit-budget-desc').value.trim();
+
+  if (!amount || amount < 1) {
+    flashInput('edit-budget-amount');
+    return;
+  }
+
+  const entry = state.budget.log.find(e => e.id === id);
+  if (!entry) return;
+
+  // 잔액 조정 (기존 금액 복구 후 새 금액 적용)
+  const oldAmount = entry.amount;
+  const difference = amount - oldAmount;
+
+  if (entry.type === 'income') {
+    state.budget.balance += difference;
+  } else if (entry.type === 'expense') {
+    state.budget.balance -= difference;
+    // 카드 실적 조정
+    if (entry.isCardSpending) {
+      state.budget.cardSpending += difference;
+    }
+  } else if (entry.type === 'saving') {
+    state.budget.balance -= difference;
+    state.budget.totalSavings += difference;
+  }
+
+  // 항목 업데이트
+  entry.amount = amount;
+  entry.desc = desc || null;
+
+  saveData();
+  renderBudget();
+  closeBudgetEditModal();
+}
+
+/**
+ * 가계부 항목 수정 모달 닫기
+ */
+function closeBudgetEditModal() {
+  document.getElementById('edit-budget-modal').classList.add('hidden');
 }
 
 /**
@@ -1594,7 +1768,6 @@ function openBillEditModal(billId) {
   document.getElementById('edit-bill-title').value = bill.title;
   document.getElementById('edit-bill-amount').value = bill.amount || '';
   document.getElementById('edit-bill-day').value = bill.day || '';
-  document.getElementById('edit-bill-xp').value = bill.xp;
 
   document.getElementById('edit-bill-modal').classList.remove('hidden');
 }
@@ -1607,10 +1780,8 @@ function saveBillEdit() {
   const title = document.getElementById('edit-bill-title').value.trim();
   const amount = document.getElementById('edit-bill-amount').value.trim();
   const dayVal = parseInt(document.getElementById('edit-bill-day').value, 10);
-  const xpVal = parseInt(document.getElementById('edit-bill-xp').value, 10);
 
   if (!title) { flashInput('edit-bill-title'); return; }
-  if (!xpVal || xpVal < 1) { flashInput('edit-bill-xp'); return; }
 
   const bill = state.bills.find(b => b.id === id);
   if (!bill) return;
@@ -1618,7 +1789,7 @@ function saveBillEdit() {
   bill.title = title;
   bill.amount = amount || null;
   bill.day = (!isNaN(dayVal) && dayVal >= 1 && dayVal <= 31) ? dayVal : null;
-  bill.xp = xpVal;
+  bill.xp = 0;
 
   saveData();
   renderBills();
