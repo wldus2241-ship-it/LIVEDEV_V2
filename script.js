@@ -1346,10 +1346,22 @@ function init() {
   initEventListeners(); // 이벤트 연결
   initMotivationCycle(); // 동기부여 문구 주기 시작
   renderAll();          // 화면 초기 렌더링
+
+  // 렌더링 타이밍 보장: DOM 완전 로드 후 재렌더링
+  setTimeout(() => {
+    console.log('[INIT] Delayed re-render for bills'); // 디버깅
+    renderBills();
+  }, 100);
 }
 
 // DOM 준비 완료 후 실행
 document.addEventListener('DOMContentLoaded', init);
+
+// 추가 보험: window.load 시점에도 렌더링
+window.addEventListener('load', () => {
+  console.log('[INIT] Window loaded, re-rendering bills'); // 디버깅
+  renderBills();
+});
 
 /* ════════════════════════════════════════════════════
    Service Worker 등록 (PWA)
