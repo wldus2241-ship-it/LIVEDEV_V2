@@ -208,7 +208,10 @@ let state = {
  */
 function loadData() {
   const tasks = JSON.parse(localStorage.getItem(LS.TASKS) || '[]');
-  const bills = JSON.parse(localStorage.getItem(LS.BILLS) || 'null');
+  const billsRaw = localStorage.getItem(LS.BILLS);
+  console.log('[LOAD] Bills from localStorage:', billsRaw); // 디버깅
+  const bills = JSON.parse(billsRaw || 'null');
+  console.log('[LOAD] Bills parsed:', bills, 'Length:', bills ? bills.length : 'null'); // 디버깅
   const stats = JSON.parse(localStorage.getItem(LS.STATS) || 'null');
   const budget = JSON.parse(localStorage.getItem(LS.BUDGET) || 'null');
   const history = JSON.parse(localStorage.getItem(LS.HISTORY) || '[]');
@@ -226,8 +229,10 @@ function loadData() {
       xp: b.xp,
       done: false,
     }));
+    console.log('[LOAD] Bills initialized from DEFAULT_BILLS:', state.bills.length); // 디버깅
   } else {
     state.bills = bills;
+    console.log('[LOAD] Bills loaded from localStorage:', state.bills.length); // 디버깅
   }
 
   // 통계: 처음이면 기본값
@@ -553,10 +558,16 @@ function renderTaskList(containerId, tasks, isDoneSection) {
  * - 금액 표시
  */
 function renderBills() {
+  console.log('[RENDER] renderBills called, state.bills.length:', state.bills.length); // 디버깅
   const container = document.getElementById('bill-list');
+  if (!container) {
+    console.error('[RENDER] bill-list container not found!'); // 디버깅
+    return;
+  }
   container.innerHTML = '';
 
   if (state.bills.length === 0) {
+    console.log('[RENDER] Bills empty, showing empty state'); // 디버깅
     container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🏠</div>항목 없음</div>`;
   } else {
     // 납부일 기준 정렬 (day 없는 항목은 맨 뒤)
@@ -616,12 +627,14 @@ function renderBills() {
 function renderStabilityBar() {
   const total = state.bills.length;
   const done  = state.bills.filter(b => b.done).length;
+  console.log('[RENDER] renderStabilityBar - done:', done, 'total:', total); // 디버깅
 
   const doneEl = document.getElementById('bills-done-count');
   const totalEl = document.getElementById('bills-total-count');
 
   if (doneEl) doneEl.textContent = done;
   if (totalEl) totalEl.textContent = total;
+  console.log('[RENDER] Updated counts - done:', doneEl?.textContent, 'total:', totalEl?.textContent); // 디버깅
 }
 
 /**
